@@ -1,0 +1,36 @@
+<VirtualHost *:80>
+    <% if @params[:server_name] then -%>
+    ServerName <%= @params[:server_name] %>
+    <% end -%>
+
+    <% if @params[:server_aliases] then -%>
+      <% [@params[:server_aliases]].flatten.each do |a| -%>
+    ServerAlias <%= a %>
+      <% end -%>
+    <% end -%>
+
+    DocumentRoot <%= @params[:docroot] || '/var/www' %>
+    CustomLog /var/log/httpd/<%= @params[:server_name] || 'default_site' %>.log combined
+    ErrorLog /var/log/httpd/<%= @params[:server_name] || 'default_site' %>_error.log
+
+    <Directory />
+        Options FollowSymLinks
+        AllowOverride None
+    </Directory>
+
+    <Directory <%= @params[:docroot] || '/var/www' %>>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride None
+        # apache 2.4, sigh
+        require all granted
+    </Directory>
+
+    <% if @params[:extra_lines] then -%>
+    # extra lines supplied to template
+      <% [@params[:extra_lines]].flatten.each do |line| -%>
+        <%= line %>
+      <% end -%>
+    <% end -%>
+
+    LogLevel warn
+</VirtualHost>
